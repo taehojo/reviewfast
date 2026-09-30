@@ -1,0 +1,902 @@
+{
+ "source": "AN-0001-08 of the accompanying paper: hybrid-order label sequences (SYNERGY labels, CC0) and buscarpy 0.0.2 calculate_h0 values",
+ "jev_only_stat_k": {
+  "Donners_2021": {
+   "0": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "1": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "2": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "3": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "4": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "5": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "6": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "7": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "8": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   },
+   "9": {
+    "stat_k": 115,
+    "stat_rec": 1.0
+   }
+  },
+  "Theobald_2021": {
+   "0": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "1": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "2": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "3": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "4": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "5": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "6": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "7": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "8": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   },
+   "9": {
+    "stat_k": 68,
+    "stat_rec": 1.0
+   }
+  }
+ },
+ "sequences": {
+  "heldout|Theobald_2021": {
+   "N": 70,
+   "labels_in_order": [
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "heldout|Donners_2021": {
+   "N": 119,
+   "labels_in_order": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ },
+ "buscarpy": [
+  {
+   "key": "heldout|Donners_2021",
+   "t": 1,
+   "p_buscarpy": 1.0
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 3,
+   "p_buscarpy": 1.0
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 5,
+   "p_buscarpy": 1.0
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 7,
+   "p_buscarpy": 1.0
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 9,
+   "p_buscarpy": 0.990990990990991
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 11,
+   "p_buscarpy": 0.999995491738611
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 13,
+   "p_buscarpy": 0.9906542056074766
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 15,
+   "p_buscarpy": 0.9719626168224299
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 17,
+   "p_buscarpy": 0.9982366425674484
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 19,
+   "p_buscarpy": 0.9999932178560287
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 21,
+   "p_buscarpy": 0.98
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 23,
+   "p_buscarpy": 0.96
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 25,
+   "p_buscarpy": 0.94
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 27,
+   "p_buscarpy": 0.9199999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 29,
+   "p_buscarpy": 0.9
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 31,
+   "p_buscarpy": 0.88
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 33,
+   "p_buscarpy": 0.86
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 35,
+   "p_buscarpy": 0.84
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 37,
+   "p_buscarpy": 0.8200000000000001
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 39,
+   "p_buscarpy": 0.8
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 41,
+   "p_buscarpy": 0.78
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 43,
+   "p_buscarpy": 0.76
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 45,
+   "p_buscarpy": 0.74
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 47,
+   "p_buscarpy": 0.72
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 49,
+   "p_buscarpy": 0.7
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 51,
+   "p_buscarpy": 0.6799999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 53,
+   "p_buscarpy": 0.6599999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 55,
+   "p_buscarpy": 0.6399999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 57,
+   "p_buscarpy": 0.62
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 59,
+   "p_buscarpy": 0.6
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 61,
+   "p_buscarpy": 0.5800000000000001
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 63,
+   "p_buscarpy": 0.5599999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 65,
+   "p_buscarpy": 0.5399999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 67,
+   "p_buscarpy": 0.52
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 69,
+   "p_buscarpy": 0.5
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 71,
+   "p_buscarpy": 0.48
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 73,
+   "p_buscarpy": 0.46000000000000013
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 75,
+   "p_buscarpy": 0.44
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 77,
+   "p_buscarpy": 0.42000000000000004
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 79,
+   "p_buscarpy": 0.39999999999999997
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 81,
+   "p_buscarpy": 0.38
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 83,
+   "p_buscarpy": 0.36
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 85,
+   "p_buscarpy": 0.34
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 87,
+   "p_buscarpy": 0.32000000000000006
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 89,
+   "p_buscarpy": 0.3
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 91,
+   "p_buscarpy": 0.28
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 93,
+   "p_buscarpy": 0.26
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 95,
+   "p_buscarpy": 0.24000000000000002
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 97,
+   "p_buscarpy": 0.22
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 99,
+   "p_buscarpy": 0.2
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 101,
+   "p_buscarpy": 0.18
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 103,
+   "p_buscarpy": 0.16
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 105,
+   "p_buscarpy": 0.14
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 107,
+   "p_buscarpy": 0.12
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 109,
+   "p_buscarpy": 0.1
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 111,
+   "p_buscarpy": 0.08000000000000002
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 113,
+   "p_buscarpy": 0.060000000000000005
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 114,
+   "p_buscarpy": 0.04999999999999999
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 115,
+   "p_buscarpy": 0.04
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 117,
+   "p_buscarpy": 0.02
+  },
+  {
+   "key": "heldout|Donners_2021",
+   "t": 119,
+   "p_buscarpy": 0.0
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 1,
+   "p_buscarpy": 0.9857142857142858
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 2,
+   "p_buscarpy": 0.9995859213250518
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 3,
+   "p_buscarpy": 0.9852941176470589
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 5,
+   "p_buscarpy": 0.9999800462926012
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 6,
+   "p_buscarpy": 0.9999987720795447
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 7,
+   "p_buscarpy": 0.984375
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 8,
+   "p_buscarpy": 0.9995039682539683
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 9,
+   "p_buscarpy": 0.9838709677419355
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 10,
+   "p_buscarpy": 0.967741935483871
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 12,
+   "p_buscarpy": 0.9354838709677419
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 13,
+   "p_buscarpy": 0.994711792702274
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 14,
+   "p_buscarpy": 0.9994711792702274
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 15,
+   "p_buscarpy": 0.9821428571428571
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 16,
+   "p_buscarpy": 0.9993506493506493
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 17,
+   "p_buscarpy": 0.9814814814814815
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 19,
+   "p_buscarpy": 0.9444444444444444
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 20,
+   "p_buscarpy": 0.9259259259259259
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 21,
+   "p_buscarpy": 0.9074074074074074
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 22,
+   "p_buscarpy": 0.888888888888889
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 23,
+   "p_buscarpy": 0.8703703703703705
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 24,
+   "p_buscarpy": 0.8518518518518519
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 26,
+   "p_buscarpy": 0.9685534591194969
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 27,
+   "p_buscarpy": 0.9555555555555556
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 28,
+   "p_buscarpy": 0.9333333333333333
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 29,
+   "p_buscarpy": 0.9111111111111111
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 30,
+   "p_buscarpy": 0.8888888888888888
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 31,
+   "p_buscarpy": 0.8666666666666667
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 33,
+   "p_buscarpy": 0.8222222222222222
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 34,
+   "p_buscarpy": 0.8
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 35,
+   "p_buscarpy": 0.7777777777777778
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 36,
+   "p_buscarpy": 0.7555555555555555
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 37,
+   "p_buscarpy": 0.7333333333333334
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 38,
+   "p_buscarpy": 0.7111111111111111
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 40,
+   "p_buscarpy": 0.6666666666666666
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 41,
+   "p_buscarpy": 0.6444444444444444
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 42,
+   "p_buscarpy": 0.6222222222222222
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 43,
+   "p_buscarpy": 0.6
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 44,
+   "p_buscarpy": 0.5777777777777777
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 45,
+   "p_buscarpy": 0.5555555555555556
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 47,
+   "p_buscarpy": 0.5111111111111111
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 48,
+   "p_buscarpy": 0.488888888888889
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 49,
+   "p_buscarpy": 0.4666666666666667
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 50,
+   "p_buscarpy": 0.4444444444444444
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 51,
+   "p_buscarpy": 0.4222222222222223
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 52,
+   "p_buscarpy": 0.4
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 54,
+   "p_buscarpy": 0.3555555555555556
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 55,
+   "p_buscarpy": 0.33333333333333337
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 56,
+   "p_buscarpy": 0.31111111111111117
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 57,
+   "p_buscarpy": 0.288888888888889
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 58,
+   "p_buscarpy": 0.26666666666666666
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 59,
+   "p_buscarpy": 0.24444444444444446
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 61,
+   "p_buscarpy": 0.2
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 62,
+   "p_buscarpy": 0.17777777777777778
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 63,
+   "p_buscarpy": 0.15555555555555556
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 64,
+   "p_buscarpy": 0.13333333333333336
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 65,
+   "p_buscarpy": 0.1111111111111111
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 66,
+   "p_buscarpy": 0.0888888888888889
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 67,
+   "p_buscarpy": 0.06666666666666668
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 68,
+   "p_buscarpy": 0.044444444444444446
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 69,
+   "p_buscarpy": 0.022222222222222223
+  },
+  {
+   "key": "heldout|Theobald_2021",
+   "t": 70,
+   "p_buscarpy": 0.0
+  }
+ ]
+}

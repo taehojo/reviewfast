@@ -1,0 +1,4 @@
+p values: 3148 points; max |diff| vs paper implementation 6.18e-11; vs buscarpy 3.35e-11 over 3125 non-nan points (23 nan in buscarpy); decision mismatches 1
+SYNERGY held out: 23 reviews, mean proportion read 0.8763, reliable 23/23
+CLEF 2019: 28 reviews, mean proportion read 0.8608, reliable 28/28
+p-value check PASSED

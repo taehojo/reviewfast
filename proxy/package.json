@@ -1,0 +1,6 @@
+{
+  "name": "jev-screen-trial-proxy",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" }
+}

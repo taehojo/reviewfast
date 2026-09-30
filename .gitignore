@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+*.jevscreen
+*.jevscreen-wal
+*.jevscreen-shm
+oidc.txt
+.env
+.vercel/
+node_modules/

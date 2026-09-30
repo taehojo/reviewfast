@@ -1,0 +1,51 @@
+:root {
+  --bg: #f7f7f5; --surface: #ffffff; --ink: #1d1f21; --ink-2: #4a4f55; --muted: #767b82; --line: #e2e2de;
+  --accent: #2459a8; --accent-ink: #ffffff; --good: #1f7a45; --warn: #9a5b00; --bad: #b3261e; --chip: #eef1f6;
+  --radius: 8px; --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #16181b; --surface: #1f2226; --ink: #e8e9ea; --ink-2: #c3c6ca; --muted: #8d9298; --line: #33373c;
+    --accent: #7aa7ea; --accent-ink: #0d1520; --good: #5cc28a; --warn: #e0a54a; --bad: #f08a80; --chip: #2a2f36; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font); }
+header { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 2; }
+.brand { font-weight: 700; color: var(--ink); text-decoration: none; }
+.spacer { flex: 1; }
+main { max-width: 980px; margin: 0 auto; padding: 20px 16px 80px; }
+h1 { font-size: 22px; margin: 0 0 4px; } h2 { font-size: 17px; margin: 24px 0 8px; } h3 { font-size: 15px; margin: 16px 0 6px; }
+.muted { color: var(--muted); } .small { font-size: 13px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin: 12px 0; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 16px 0; overflow-x: auto; }
+.tabs a { padding: 8px 14px; text-decoration: none; color: var(--ink-2); border-bottom: 2px solid transparent; white-space: nowrap; }
+.tabs a.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+label { display: block; font-weight: 600; margin: 12px 0 4px; }
+input[type=text], input[type=password], textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font: inherit; }
+textarea { min-height: 120px; resize: vertical; }
+button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button + button { margin-left: 6px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; }
+.stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 13px; }
+.notice { border-left: 3px solid var(--warn); background: var(--surface); padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+.notice.good { border-left-color: var(--good); } .notice.bad { border-left-color: var(--bad); }
+.bar { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 10px; background: var(--chip); font-size: 12px; color: var(--ink-2); }
+.record h2 { font-size: 19px; margin: 4px 0 8px; line-height: 1.35; }
+.record .abstract { white-space: pre-wrap; font-size: 15.5px; line-height: 1.6; max-width: 75ch; }
+.decide { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.decide button { min-width: 120px; }
+.decide .inc { border-color: var(--good); } .decide .exc { border-color: var(--bad); }
+kbd { font: 12px ui-monospace, monospace; padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }
+pre { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 12px; font-size: 13.5px; }
+#toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; }
+#toast.show { opacity: 1; }
+@media (max-width: 600px) { .decide button { flex: 1; min-width: 0; } .decide kbd { display: none; } header { padding: 10px 16px; } }
