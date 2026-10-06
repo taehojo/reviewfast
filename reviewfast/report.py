@@ -103,12 +103,25 @@ def included_ris(project):
     return to_ris([{**dict(r), 'note': f"ReviewFast decision: {r['decision']}"} for r in rows])
 
 
+def _db_bytes(db):
+    """Consistent copy of the project database as bytes (Connection.serialize needs Python 3.11; older versions use a file)."""
+    mem = sqlite3.connect(':memory:'); db.backup(mem)
+    if hasattr(mem, 'serialize'):
+        data = mem.serialize(); mem.close(); return data
+    mem.close()
+    import os
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        f = os.path.join(d, 'project.sqlite'); dst = sqlite3.connect(f); db.backup(dst); dst.close()
+        with open(f, 'rb') as fh:
+            return fh.read()
+
+
 def archive(project):
     """Zip with a consistent copy of the project database, readable exports and SHA-256 sums."""
     files = {}
     buf = io.BytesIO()
-    mem = sqlite3.connect(':memory:'); project.db.backup(mem)
-    files['project.sqlite'] = mem.serialize(); mem.close()
+    files['project.sqlite'] = _db_bytes(project.db)
     meta = {r[0]: json.loads(r[1]) for r in project.db.execute('SELECT key, value FROM meta')}
     files['meta.json'] = json.dumps(meta, indent=1).encode()
     files['criteria_block.txt'] = project.criteria_text().encode()
