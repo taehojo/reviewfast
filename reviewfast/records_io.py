@@ -169,7 +169,7 @@ def fetch_pubmed(pmids, email=None, pause=0.4):
     base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
     out = []
     for i in range(0, len(pmids), 200):
-        q = {'db': 'pubmed', 'id': ','.join(pmids[i:i + 200]), 'retmode': 'xml', 'tool': 'jev-screen'}
+        q = {'db': 'pubmed', 'id': ','.join(pmids[i:i + 200]), 'retmode': 'xml', 'tool': 'reviewfast'}
         if email:
             q['email'] = email
         err = None

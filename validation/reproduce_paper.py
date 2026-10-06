@@ -1,4 +1,4 @@
-"""Checks jevscreen.stopping against the stored analysis of the accompanying paper (read only).
+"""Checks reviewfast.stopping against the stored analysis of the accompanying paper (read only).
 
 1. p values: recomputes the criterion at the 3,148 evaluation points of the buscarpy cross-check (AN-0001-08) from the stored label
    sequences and compares them with buscarpy 0.0.2 and with the paper's own implementation.
@@ -17,9 +17,9 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from jevscreen.stopping import h0_pvalue  # noqa: E402
+from reviewfast.stopping import h0_pvalue  # noqa: E402
 
-ROOT = sys.argv[1] if len(sys.argv) > 1 else '/N/project/AiLab/jev'
+ROOT = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('REVIEWFAST_PAPER_DATA', '.')   # folder with the evaluation's stored outputs
 AN = os.path.join(ROOT, 'review_pipeline/rounds/round_0001/revision/analysis/AN-0001-08')
 
 

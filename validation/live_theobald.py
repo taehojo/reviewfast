@@ -1,8 +1,8 @@
-"""Live check of the Jev client on public records: scores the 70 records of SYNERGY review Theobald_2021 through a jev-screen
+"""Live check of the Jev client on public records: scores the 70 records of SYNERGY review Theobald_2021 through a reviewfast
 project, compares the probabilities with those stored by the paper, and records the responses (answers and usage only, no record
 text) as the fixture for the offline tests.
 
-The paper sent the records in dataset order; jev-screen sends them in seeded random order, so the batch neighbours differ and some
+The paper sent the records in dataset order; reviewfast sends them in seeded random order, so the batch neighbours differ and some
 difference is expected even without a model change. The model version is not reported by the provider.
 
 Usage: AI_GATEWAY_API_KEY=... python validation/live_theobald.py
@@ -16,9 +16,9 @@ import tempfile
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, os.path.join(HERE, '..'))
-from jevscreen import scoring  # noqa: E402
-from jevscreen.jev_client import GATEWAY_URL, JevClient  # noqa: E402
-from jevscreen.project import Project  # noqa: E402
+from reviewfast import scoring  # noqa: E402
+from reviewfast.jev_client import GATEWAY_URL, JevClient  # noqa: E402
+from reviewfast.project import Project  # noqa: E402
 
 FIX = os.path.join(HERE, '..', 'tests', 'fixtures')
 
@@ -51,7 +51,7 @@ def spearman(a, b):
 def main():
     F = json.load(open(os.path.join(FIX, 'theobald_2021.json')))
     title, question, crit = split_block(F['criteria_block'])
-    tmp = tempfile.mkdtemp(); path = os.path.join(tmp, 'theobald.jevscreen')
+    tmp = tempfile.mkdtemp(); path = os.path.join(tmp, 'theobald.reviewfast')
     p = Project.create(path, title, question, crit, seed=20260930)
     assert p.criteria_text() == F['criteria_block'], 'criteria block differs from the paper'
     recs = [{'source_id': r['openalex_id'], 'title': r['title'], 'abstract': r['abstract'], 'language': 'eng'} for r in F['records']]

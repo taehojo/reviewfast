@@ -4,10 +4,11 @@ __pycache__/
 build/
 dist/
 .pytest_cache/
-*.jevscreen
-*.jevscreen-wal
-*.jevscreen-shm
+*.reviewfast
+*.reviewfast-wal
+*.reviewfast-shm
 oidc.txt
 .env
 .vercel/
 node_modules/
+site/test/_theobald.ris

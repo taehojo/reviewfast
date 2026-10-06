@@ -9,14 +9,14 @@ import httpx
 import pytest
 
 from conftest import replay_handler, split_block
-from jevscreen import records_io, report, scoring
-from jevscreen.jev_client import JevClient
-from jevscreen.project import Project, ProjectError
+from reviewfast import records_io, report, scoring
+from reviewfast.jev_client import JevClient
+from reviewfast.project import Project, ProjectError
 
 
 @pytest.fixture
 def screened(tmp_path, theobald):
-    p = Project.create(tmp_path / 't.jevscreen', *split_block(theobald['criteria_block']), seed=7)
+    p = Project.create(tmp_path / 't.reviewfast', *split_block(theobald['criteria_block']), seed=7)
     ris = records_io.to_ris([{'title': r['title'], 'abstract': r['abstract'], 'note': r['openalex_id']} for r in theobald['records']])
     fmt, recs = records_io.parse_file('search.ris', ris.encode())
     assert fmt == 'ris' and len(recs) == 70

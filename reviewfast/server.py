@@ -17,20 +17,20 @@ from .jev_client import GATEWAY_URL, AuthError, JevClient, estimate_cost
 from .project import Project, ProjectError
 
 WEB = Path(__file__).parent / 'web'
-TRIAL_URL = os.environ.get('JEV_SCREEN_TRIAL_URL', '')               # the operator's proxy, if a free trial is offered
-GITHUB_CLIENT_ID = os.environ.get('JEV_SCREEN_GITHUB_CLIENT_ID', '')  # OAuth app used by the trial proxy to identify users
+TRIAL_URL = os.environ.get('REVIEWFAST_TRIAL_URL', '')               # the operator's proxy, if a free trial is offered
+GITHUB_CLIENT_ID = os.environ.get('REVIEWFAST_GITHUB_CLIENT_ID', '')  # OAuth app used by the trial proxy to identify users
 
 
 def create_app(projects_dir, token):
     projects_dir = Path(projects_dir).expanduser(); projects_dir.mkdir(parents=True, exist_ok=True)
-    app = FastAPI(title='jev-screen', version=__version__, docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title='ReviewFast', version=__version__, docs_url=None, redoc_url=None, openapi_url=None)
     open_projects, jobs, trial = {}, {}, {'token': None, 'device': None}
     lock = threading.Lock()
 
     @app.middleware('http')
     async def require_token(request: Request, call_next):
         if request.url.path.startswith('/api/') and not secrets.compare_digest(request.headers.get('x-token', ''), token):
-            return JSONResponse({'detail': 'Missing or wrong session token. Open the address printed by jev-screen serve.'}, 401)
+            return JSONResponse({'detail': 'Missing or wrong session token. Open the address printed by reviewfast serve.'}, 401)
         return await call_next(request)
 
     @app.exception_handler(ProjectError)
@@ -47,7 +47,7 @@ def create_app(projects_dir, token):
         name = slug(name)
         with lock:
             if name not in open_projects:
-                path = projects_dir / f'{name}.jevscreen'
+                path = projects_dir / f'{name}.reviewfast'
                 if not path.exists():
                     raise HTTPException(404, 'No such project.')
                 open_projects[name] = Project(path)
@@ -62,19 +62,19 @@ def create_app(projects_dir, token):
     @app.get('/api/projects')
     def list_projects():
         out = []
-        for f in sorted(projects_dir.glob('*.jevscreen')):
+        for f in sorted(projects_dir.glob('*.reviewfast')):
             p = proj(f.stem); out.append({'name': f.stem, 'title': p.meta('title'), 'created': p.meta('created'), 'counts': p.counts()})
         return out
 
     @app.post('/api/projects')
     def new_project(d: dict = Body(...)):
         name = slug(d.get('name', ''))
-        if (projects_dir / f'{name}.jevscreen').exists():
+        if (projects_dir / f'{name}.reviewfast').exists():
             raise HTTPException(409, 'A project with this name exists.')
         for k in ('title', 'question', 'criteria'):
             if not (d.get(k) or '').strip():
                 raise HTTPException(400, f'{k} is required.')
-        Project.create(projects_dir / f'{name}.jevscreen', d['title'], d['question'], d['criteria']).close()
+        Project.create(projects_dir / f'{name}.reviewfast', d['title'], d['question'], d['criteria']).close()
         return {'name': name}
 
     @app.get('/api/p/{name}')
@@ -274,7 +274,7 @@ def serve(projects_dir, host='127.0.0.1', port=8765, open_browser=True):
     token = secrets.token_urlsafe(24)
     app = create_app(projects_dir, token)
     url = f'http://{host}:{port}/#t={token}'
-    print(f'jev-screen {__version__}\nProjects: {Path(projects_dir).expanduser()}\nOpen: {url}\n(Ctrl+C to stop)', flush=True)
+    print(f'ReviewFast {__version__}\nProjects: {Path(projects_dir).expanduser()}\nOpen: {url}\n(Ctrl+C to stop)', flush=True)
     if open_browser:
         import webbrowser
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()

@@ -1,4 +1,4 @@
-// POST /api/score: forwards one Jev screening request (the same body jev-screen sends to the gateway) with the operator's key.
+// POST /api/score: forwards one Jev screening request (the same body ReviewFast sends to the gateway) with the operator's key.
 import { LIMITS, githubUser, kv, month } from './_lib.js';
 
 const GATEWAY = 'https://ai-gateway.vercel.sh/typesafe/v1/systemone';
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   const qs = b.questions && typeof b.questions === 'object' ? Object.values(b.questions) : [];
   if (b.model !== 'typesafe-ai/jev' || typeof b.state !== 'string' || b.state.length > LIMITS.maxStateChars || !qs.length || qs.length > LIMITS.maxQuestions
       || qs.some((q) => q?.type !== 'noul' || typeof q.instructions !== 'string' || q.instructions.length > 500)) {
-    return res.status(400).json({ error: { message: 'Only jev-screen screening requests are accepted.' } });
+    return res.status(400).json({ error: { message: 'Only ReviewFast screening requests are accepted.' } });
   }
   // per-minute rate, monthly budget, per-user record quota (reserved before the call, released if the call fails)
   const minuteKey = `trial:rpm:${user.id}:${Math.floor(Date.now() / 60000)}`;

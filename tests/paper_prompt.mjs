@@ -1,5 +1,5 @@
 // Request bodies built exactly as in the paper's scorer (synergy/run_screen.mjs, lines 16-22 and 33-37, copied verbatim), for
-// the Theobald_2021 fixture in batches of 10 in fixture order. tests/test_jev_client.py compares them with jevscreen.
+// the Theobald_2021 fixture in batches of 10 in fixture order. tests/test_jev_client.py compares them with reviewfast.
 import fs from 'node:fs';
 const F = JSON.parse(fs.readFileSync(new URL('./fixtures/theobald_2021.json', import.meta.url), 'utf8'));
 const CRIT = { Theobald_2021: F.criteria_block };

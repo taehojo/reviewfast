@@ -50,7 +50,7 @@ def methods_text(project):
     rt = project.meta('recall_target'); conf = project.meta('confidence')
     when = first if first == last else f'between {first} and {last}'
     parts = [
-        f"We screened titles and abstracts with jev-screen {__version__}. Of {_n(P['records_identified'], 'record')} retrieved, "
+        f"We screened titles and abstracts with ReviewFast {__version__}. Of {_n(P['records_identified'], 'record')} retrieved, "
         + (f"we removed {_n(P['duplicates_removed'], 'duplicate')} (matched on DOI, PubMed identifier, or normalised title and year), leaving "
            f"{_n(P['records_after_deduplication'], 'unique record')}." if P['duplicates_removed'] else
            "we found no duplicates (matched on DOI, PubMed identifier, or normalised title and year)."),
@@ -100,7 +100,7 @@ DECISION_COLUMNS = ['rid', 'source_id', 'pmid', 'doi', 'title', 'year', 'journal
 def included_ris(project):
     rows = project.db.execute("SELECT r.*, d.decision FROM records r JOIN decisions d ON d.rid=r.rid WHERE d.decision IN ('include','maybe') "
                               "ORDER BY d.seq").fetchall()
-    return to_ris([{**dict(r), 'note': f"jev-screen decision: {r['decision']}"} for r in rows])
+    return to_ris([{**dict(r), 'note': f"ReviewFast decision: {r['decision']}"} for r in rows])
 
 
 def archive(project):

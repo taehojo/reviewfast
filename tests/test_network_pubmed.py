@@ -5,7 +5,7 @@ import re
 import httpx
 import pytest
 
-from jevscreen import records_io
+from reviewfast import records_io
 
 BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 TERM = 'statistical stopping criteria automated screening systematic reviews'
@@ -13,9 +13,9 @@ TERM = 'statistical stopping criteria automated screening systematic reviews'
 
 @pytest.mark.network
 def test_medline_and_xml_agree():
-    ids = httpx.get(BASE + 'esearch.fcgi', params={'db': 'pubmed', 'term': TERM, 'retmode': 'json', 'tool': 'jev-screen'}, timeout=60).json()['esearchresult']['idlist']
+    ids = httpx.get(BASE + 'esearch.fcgi', params={'db': 'pubmed', 'term': TERM, 'retmode': 'json', 'tool': 'reviewfast'}, timeout=60).json()['esearchresult']['idlist']
     assert ids
-    get = lambda **kw: httpx.get(BASE + 'efetch.fcgi', params={'db': 'pubmed', 'id': ','.join(ids), 'tool': 'jev-screen', **kw}, timeout=60).content
+    get = lambda **kw: httpx.get(BASE + 'efetch.fcgi', params={'db': 'pubmed', 'id': ','.join(ids), 'tool': 'reviewfast', **kw}, timeout=60).content
     fx, xml = records_io.parse_file('x.xml', get(retmode='xml'))
     fm, med = records_io.parse_file('x.nbib', get(rettype='medline', retmode='text'))
     assert (fx, fm) == ('pubmed-xml', 'medline') and len(xml) == len(med) == len(ids)

@@ -24,7 +24,7 @@ export const month = () => new Date().toISOString().slice(0, 7);
 export async function githubUser(req) {
   const auth = req.headers.authorization || '';
   if (!auth.startsWith('Bearer ')) return null;
-  const r = await fetch('https://api.github.com/user', { headers: { Authorization: auth, 'User-Agent': 'jev-screen-trial', Accept: 'application/vnd.github+json' } });
+  const r = await fetch('https://api.github.com/user', { headers: { Authorization: auth, 'User-Agent': 'reviewfast-trial', Accept: 'application/vnd.github+json' } });
   if (!r.ok) return null;
   const u = await r.json();
   return { id: String(u.id), ageDays: (Date.now() - Date.parse(u.created_at)) / 86400000 };

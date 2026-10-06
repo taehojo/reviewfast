@@ -1,4 +1,4 @@
-"""Command line: jev-screen serve | new | import | score | rank | status | export."""
+"""Command line: reviewfast serve | new | import | score | rank | status | export."""
 import argparse
 import json
 import os
@@ -10,11 +10,11 @@ from . import __version__, records_io, report, scoring
 from .jev_client import GATEWAY_URL, JevClient, estimate_cost
 from .project import Project
 
-DEFAULT_DIR = os.environ.get('JEV_SCREEN_PROJECTS', str(Path.home() / 'jev-screen-projects'))
+DEFAULT_DIR = os.environ.get('REVIEWFAST_PROJECTS', str(Path.home() / 'reviewfast-projects'))
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog='jev-screen', description='Title and abstract screening ranked by Jev, stopped by a statistical criterion.')
+    ap = argparse.ArgumentParser(prog='reviewfast', description='Title and abstract screening ranked by Jev, stopped by a statistical criterion.')
     ap.add_argument('--version', action='version', version=__version__)
     sub = ap.add_subparsers(dest='cmd', required=True)
     s = sub.add_parser('serve', help='start the local web app'); s.add_argument('--dir', default=DEFAULT_DIR); s.add_argument('--port', type=int, default=8765)
@@ -36,7 +36,7 @@ def main(argv=None):
         Project.create(a.project, a.title, a.question, Path(a.criteria_file).read_text()).close(); print('created', a.project); return
     p = Project(a.project)
     if not p.meta('created'):
-        sys.exit(f'{a.project} is not a jev-screen project.')
+        sys.exit(f'{a.project} is not a reviewfast project.')
     if a.cmd == 'import':
         for f in a.files:
             fmt, recs = records_io.parse_file(f, Path(f).read_bytes())

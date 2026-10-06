@@ -15,5 +15,6 @@ jobs:
         with:
           node-version: '20'
       - run: pip install -e '.[test]'
-      - run: node --check jevscreen/web/app.js
+      - run: node --check reviewfast/web/app.js && node --check site/app.js
+      - run: node site/test/core.test.js
       - run: pytest -q

@@ -1,12 +1,12 @@
 'use strict';
-// jev-screen browser client. Plain JavaScript, no build step.
+// ReviewFast local web client. Plain JavaScript, no build step.
 
 let TOKEN = null;
 (function initToken() {
   const m = location.hash.match(/^#t=([\w-]+)/);
   try {
-    if (m) { sessionStorage.setItem('jevscreen-token', m[1]); }
-    TOKEN = m ? m[1] : sessionStorage.getItem('jevscreen-token');
+    if (m) { sessionStorage.setItem('reviewfast-token', m[1]); }
+    TOKEN = m ? m[1] : sessionStorage.getItem('reviewfast-token');
   } catch (e) { TOKEN = m ? m[1] : null; }
   if (m) history.replaceState(null, '', '#/');
 })();
@@ -38,7 +38,7 @@ async function download(path) {
 let POLL = null;
 window.addEventListener('hashchange', route);
 window.addEventListener('load', async () => {
-  if (!TOKEN) { $('#main').innerHTML = '<div class="notice bad">No session token. Open the address printed by <code>jev-screen serve</code>.</div>'; return; }
+  if (!TOKEN) { $('#main').innerHTML = '<div class="notice bad">No session token. Open the address printed by <code>reviewfast serve</code>.</div>'; return; }
   try { const i = await api('/info'); $('#version').textContent = 'v' + i.version; window.INFO = i; } catch (e) { $('#main').innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; return; }
   route();
 });
@@ -102,7 +102,7 @@ function overviewTab(name, S, el) {
     <div class="card"><b>Next step:</b> <a href="#/p/${name}/${step}">${{ import: 'Import search results', score: 'Score and freeze the ranking', screen: 'Screen in ranked order' }[step]}</a></div>
     <h2>Protocol</h2>
     <div class="card"><h3>Research question</h3><p>${esc(S.meta.question)}</p><h3>Eligibility criteria</h3><pre>${esc(S.meta.criteria)}</pre>
-    <p class="small muted">Stopping target: recall ${S.meta.recall_target} with confidence ${S.meta.confidence}. Created ${esc(S.meta.created)} with jev-screen ${esc(S.meta.app_version)}.</p></div>`;
+    <p class="small muted">Stopping target: recall ${S.meta.recall_target} with confidence ${S.meta.confidence}. Created ${esc(S.meta.created)} with ReviewFast ${esc(S.meta.app_version)}.</p></div>`;
 }
 
 let LAST_IMPORT = null, LAST_IMPORT_FOR = null;
@@ -212,7 +212,7 @@ function stopPanel(st) {
 
 async function screenTab(name, S, el) {
   if (!S.ranked) { el.innerHTML = `<div class="notice">Score the records and freeze the ranking first (<a href="#/p/${name}/score">Score</a>).</div>`; return; }
-  let showScore = false; try { showScore = localStorage.getItem('jevscreen-show-score') === '1'; } catch (e) { /* storage unavailable */ }
+  let showScore = false; try { showScore = localStorage.getItem('reviewfast-show-score') === '1'; } catch (e) { /* storage unavailable */ }
   let cur = null;
   const render = async () => {
     const d = await api(`/p/${name}/next?queue=ranked&show_score=${showScore}`); cur = d.record;
@@ -232,7 +232,7 @@ async function screenTab(name, S, el) {
     el.querySelectorAll('.decide button[data-d]').forEach((b) => { b.onclick = () => decide(b.dataset.d); });
     const u = $('#undo'); if (u) u.onclick = undo;
     const sb = $('#stopbtn'); if (sb) sb.onclick = async () => { if (confirm('Stop screening the ranked list? The remaining ranked records will be reported as not screened.')) { try { await api(`/p/${name}/stop`, { method: 'POST' }); render(); } catch (e) { toast(e.message); } } };
-    $('#ss').onchange = (e) => { showScore = e.target.checked; try { localStorage.setItem('jevscreen-show-score', showScore ? '1' : '0'); } catch (x) { /* ignore */ } render(); };
+    $('#ss').onchange = (e) => { showScore = e.target.checked; try { localStorage.setItem('reviewfast-show-score', showScore ? '1' : '0'); } catch (x) { /* ignore */ } render(); };
   };
   let busy = false;
   const decide = async (dcs) => { if (!cur || busy) return; busy = true; try { await api(`/p/${name}/decide`, { json: { rid: cur.rid, decision: dcs } }); await render(); } catch (e) { toast(e.message); } busy = false; };

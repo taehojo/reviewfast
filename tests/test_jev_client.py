@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from conftest import replay_handler
-from jevscreen import jev_client as jc
+from reviewfast import jev_client as jc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from jevscreen import stopping
+from reviewfast import stopping
 
 
 def test_matches_buscarpy(stopping_ref):

@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
 
 from conftest import split_block
-from jevscreen import records_io
-from jevscreen.server import create_app
+from reviewfast import records_io
+from reviewfast.server import create_app
 
 
 def test_token_required_and_basic_flow(tmp_path, theobald):
