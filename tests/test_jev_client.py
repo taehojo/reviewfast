@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 @pytest.mark.skipif(shutil.which('node') is None, reason='node not installed')
 def test_request_identical_to_paper_scorer(theobald):
-    """The request bodies are byte-identical to those of the paper's scorer (synergy/run_screen.mjs)."""
+    """For the same batch of records, the request bodies are byte-identical to those of the paper's scorer (synergy/run_screen.mjs)."""
     ref = json.loads(subprocess.run(['node', os.path.join(HERE, 'paper_prompt.mjs')], capture_output=True, text=True, check=True).stdout)
     from conftest import split_block
     crit = jc.criteria_block(*split_block(theobald['criteria_block']))

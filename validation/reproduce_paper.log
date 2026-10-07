@@ -1,4 +1,8 @@
-p values: 3148 points; max |diff| vs paper implementation 6.18e-11; vs buscarpy 3.35e-11 over 3125 non-nan points (23 nan in buscarpy); decision mismatches 1
-SYNERGY held out: 23 reviews, mean proportion read 0.8763, reliable 23/23
-CLEF 2019: 28 reviews, mean proportion read 0.8608, reliable 28/28
-p-value check PASSED
+1. p values: 3148 points; max |diff| vs paper implementation 6.18e-11; vs buscarpy 3.35e-11 over 3125 points (23 undefined in buscarpy); decision mismatches 1
+2. label-free Jev ranking + statistical stopping, SYNERGY+ held out: 23 reviews, 87.6% read, reliable 23/23 (paper: 87.6%, 23/23) OK
+2. label-free Jev ranking + statistical stopping, CLEF 2019: 28 reviews, 86.1% read, reliable 28/28 (paper: 86.1%, 28/28) OK
+3. ASReview ranking + statistical stopping, SYNERGY+ held out: 23 reviews, 90.1% read, reliable 23/23 (paper: 90.1%, 23/23) OK
+3. ASReview ranking + statistical stopping, CLEF 2019: 28 reviews, 86.9% read, reliable 28/28 (paper: 86.9%, 28/28) OK
+4. label-free threshold tau = 0.07, SYNERGY+ held out: 23 reviews, 58.9% read, reliable 23/23 (paper: 58.9%, 23/23) OK
+4. label-free threshold tau = 0.07, CLEF 2019: 28 reviews, 39.1% read, reliable 25/28 (paper: 39.1%, 25/28) OK
+All checks PASSED
