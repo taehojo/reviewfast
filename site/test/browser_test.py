@@ -91,10 +91,10 @@ with sync_playwright() as p:
         while page.query_selector('.record h3'):
             t = page.inner_text('.record h3'); page.keyboard.press('i' if label.get(t) else 'e')
         page.wait_for_selector('text=Manual queue done'); page.click('.stepper a:has-text("Sample check")')
-        page.wait_for_selector('#adraw'); page.click('#adraw'); page.wait_for_selector('text=Sample check')
+        page.wait_for_selector('#adraw'); page.click('#adraw'); page.wait_for_selector('#view .card h3:has-text("Sample check")')
         while page.query_selector('.record h3'):
             t = page.inner_text('.record h3'); page.keyboard.press('i' if label.get(t) else 'e')
-        page.wait_for_selector('text=Sample check done'); shot(page, 'audit')
+        page.wait_for_selector('#view h3:has-text("Sample check done")'); shot(page, 'audit')
         page.click('#view a.btn:has-text("Report")'); page.wait_for_selector('#mt'); shot(page, 'report')
         methods = page.inner_text('#mt'); assert 'We stopped screening' in methods and '—' not in methods
         with page.expect_download() as d:
