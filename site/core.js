@@ -6,7 +6,7 @@
   else root.RF = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = '0.3.0';
+  const VERSION = '0.3.1';
   const GATEWAY_URL = 'https://ai-gateway.vercel.sh/typesafe/v1/systemone';
   const MODEL = 'typesafe-ai/jev';
   const BATCH_SIZE = 10;

@@ -82,7 +82,8 @@ def create_app(projects_dir, token):
         p = proj(name)
         return {'name': slug(name), 'meta': {k: p.meta(k) for k in ('title', 'question', 'criteria', 'created', 'app_version', 'recall_target', 'confidence', 'ranked_at', 'stopped_at')},
                 'counts': p.counts(), 'scoring': p.scoring_summary(), 'ranked': p.is_ranked(), 'stop': p.stop_status(),
-                'job': job_state(slug(name)), 'estimate_usd': estimate_cost(len(p.to_score())), 'to_score': len(p.to_score())}
+                'job': job_state(slug(name)), 'estimate_usd': estimate_cost(len(p.to_score())), 'to_score': len(p.to_score()),
+                'audit': p.audit_summary()}
 
     @app.put('/api/p/{name}/criteria')
     def criteria(name: str, d: dict = Body(...)):
@@ -210,6 +211,10 @@ def create_app(projects_dir, token):
     @app.post('/api/p/{name}/stop')
     def stop(name: str):
         return proj(name).stop()
+
+    @app.post('/api/p/{name}/audit')
+    def audit(name: str, d: dict = Body(...)):
+        return proj(name).draw_audit(int(d['size']))
 
     # ---------- exports
     @app.get('/api/p/{name}/export/{what}')

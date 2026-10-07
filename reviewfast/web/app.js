@@ -79,7 +79,7 @@ async function homeView() {
 }
 
 // ---------- project
-const TABS = [['overview', 'Overview'], ['import', 'Import'], ['score', 'Score'], ['screen', 'Screen'], ['manual', 'Manual queue'], ['report', 'Report']];
+const TABS = [['overview', 'Overview'], ['import', 'Import'], ['score', 'Score'], ['screen', 'Screen'], ['manual', 'Manual queue'], ['audit', 'Sample check'], ['report', 'Report']];
 async function projectView(name, tab) {
   let S;
   try { S = await api(`/p/${name}`); } catch (e) { $('#main').innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; return; }
@@ -89,7 +89,7 @@ async function projectView(name, tab) {
     <nav class="tabs">${TABS.map(([k, l]) => `<a href="#/p/${name}/${k}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</nav>
     <section id="tab"></section>`;
   const el = $('#tab');
-  ({ overview: overviewTab, import: importTab, score: scoreTab, screen: screenTab, manual: manualTab, report: reportTab }[tab] || overviewTab)(name, S, el);
+  ({ overview: overviewTab, import: importTab, score: scoreTab, screen: screenTab, manual: manualTab, audit: auditTab, report: reportTab }[tab] || overviewTab)(name, S, el);
 }
 
 function stats(items) { return `<div class="stats">${items.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('')}</div>`; }
@@ -218,7 +218,7 @@ async function screenTab(name, S, el) {
     const d = await api(`/p/${name}/next?queue=ranked&show_score=${showScore}`); cur = d.record;
     const st = d.stop; const stopped = st.stopped_at !== null && st.stopped_at !== undefined;
     el.innerHTML = `${stopPanel(st)}
-      ${stopped ? `<div class="notice good">Screening of the ranked list stopped after ${fmt(st.stopped_at)} records. ${st.manual_remaining ? `<a href="#/p/${name}/manual">Screen the manual queue</a>, then` : 'Next:'} <a href="#/p/${name}/report">report</a>.</div>`
+      ${stopped ? `<div class="notice good">Screening of the ranked list stopped after ${fmt(st.stopped_at)} records. ${st.manual_remaining ? `<a href="#/p/${name}/manual">Screen the manual queue</a>, then` : 'Next:'} <a href="#/p/${name}/audit">check a random sample of the unscreened records</a> and <a href="#/p/${name}/report">report</a>.</div>`
       : !cur ? `<div class="notice good">All ranked records have been screened.</div>`
       : `<div class="card record">
         <div class="row small muted"><span>Rank ${fmt(cur.rank)} of ${fmt(st.ranked_total)}</span>${cur.year ? `<span>${esc(cur.year)}</span>` : ''}${cur.journal ? `<span>${esc(cur.journal)}</span>` : ''}${showScore ? `<span class="chip">Jev p = ${fmt(cur.p, 3)}</span>` : ''}</div>
@@ -266,6 +266,34 @@ async function manualTab(name, S, el) {
   render();
 }
 
+async function auditTab(name, S, el) {
+  if (S.meta.stopped_at === null || S.meta.stopped_at === undefined) { el.innerHTML = '<div class="notice">The sample check is available after you stop screening the ranked list.</div>'; return; }
+  if (!S.audit) {
+    const pool = S.counts.ranked_unscreened, def = Math.min(pool, Math.max(20, Math.ceil(pool * 0.05)));
+    el.innerHTML = `<div class="card"><h2>Check a random sample of the records you did not screen</h2>
+      <p class="small muted">The accompanying paper suggests double-screening a random sample of the records left unscreened. The sample is drawn with the project seed; decisions on it do not change the stopping statistics, and any relevant record found there is reported.</p>
+      <label>Sample size (of ${fmt(pool)} unscreened ranked records) <input id="asz" value="${def}" size="6"></label> <button class="primary" id="adraw">Draw the sample</button></div>`;
+    $('#adraw').onclick = async () => { const n = parseInt($('#asz').value, 10); if (!(n > 0)) { toast('Enter a sample size of at least 1.'); return; }
+      try { await api(`/p/${name}/audit`, { json: { size: n } }); projectView(name, 'audit'); } catch (e) { toast(e.message); } };
+    return;
+  }
+  let cur = null;
+  const render = async () => {
+    const S2 = await api(`/p/${name}`); const A = S2.audit;
+    const d = await api(`/p/${name}/next?queue=audit`); cur = d.record;
+    const sum = `<p class="small muted">Sample: ${fmt(A.drawn)} of ${fmt(A.pool)} unscreened ranked records; screened ${fmt(A.screened)}; judged relevant or maybe ${fmt(A.relevant)}.</p>
+      ${A.relevant ? '<div class="notice bad">Relevant records turned up among those you did not screen. Consider screening more of the ranked list, and report this in the review.</div>' : ''}`;
+    el.innerHTML = !cur ? `${sum}<div class="notice good">The sample check is done. <a href="#/p/${name}/report">Report</a>.</div>` : `${sum}
+      <div class="card record"><div class="row small muted"><span class="chip">rank ${fmt(cur.rank)}, not screened before stopping</span>${cur.year ? `<span>${esc(cur.year)}</span>` : ''}${cur.journal ? `<span>${esc(cur.journal)}</span>` : ''}</div>
+      <h2>${esc(cur.title)}</h2><div class="abstract">${esc(cur.abstract || '(no abstract)')}</div>
+      <div class="decide"><button class="inc" data-d="include">Include <kbd>I</kbd></button><button data-d="maybe">Maybe <kbd>M</kbd></button><button class="exc" data-d="exclude">Exclude <kbd>E</kbd></button></div></div>`;
+    el.querySelectorAll('.decide button').forEach((b) => { b.onclick = () => decide(b.dataset.d); });
+  };
+  const decide = async (dcs) => { if (!cur) return; try { await api(`/p/${name}/decide`, { json: { rid: cur.rid, decision: dcs } }); render(); } catch (e) { toast(e.message); } };
+  document.onkeydown = (e) => { if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey) return; const k = e.key.toLowerCase(); if (k === 'i') decide('include'); else if (k === 'e') decide('exclude'); else if (k === 'm') decide('maybe'); };
+  render();
+}
+
 async function reportTab(name, S, el) {
   const P = await api(`/p/${name}/export/prisma.json`); const M = await api(`/p/${name}/export/methods.txt`);
   const row = (l, v) => `<tr><td>${l}</td><td style="text-align:right">${fmt(v)}</td></tr>`;
@@ -276,7 +304,7 @@ async function reportTab(name, S, el) {
       ${row('Records identified', P.records_identified)}${row('Duplicates removed', P.duplicates_removed)}${row('Records after deduplication', P.records_after_deduplication)}
       ${row('Ranked by Jev', P.records_ranked_by_jev)}${row('Screened outside the ranking (manual queue)', P.records_for_manual_screening)}
       ${row('Records screened', P.records_screened)}${row('Not screened after the stopping criterion was met', P.records_not_screened_after_stopping)}
-      ${row('Not yet screened', P.records_not_yet_screened)}${row('Records excluded', P.records_excluded)}${row('Records sought for full-text retrieval (include or maybe)', P.records_sought_for_retrieval)}
+      ${row('Not yet screened', P.records_not_yet_screened)}${P.audit ? row('Random-sample check after stopping: screened', P.audit.screened) + row('Random-sample check: judged relevant or maybe', P.audit.relevant) : ''}${row('Records excluded', P.records_excluded)}${row('Records sought for full-text retrieval (include or maybe)', P.records_sought_for_retrieval)}
     </table><p class="small muted">Report records not screened after stopping as excluded by the stopping rule, and name the rule, in the PRISMA flow diagram.</p></div>
     <h2>Methods paragraph (draft)</h2>
     <div class="card"><pre id="mt">${esc(M)}</pre><button id="cp">Copy</button></div>

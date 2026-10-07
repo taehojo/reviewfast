@@ -50,7 +50,7 @@ Tools: `create_project`, `import_records`, `estimate_scoring_cost`, `score_recor
 4. **Freeze the ranking.** The order is fixed: highest probability first, with ties broken by the project seed. Records that the model did not score, including refusals, move to the manual queue.
 5. **Screen.** You see one record at a time, in ranked order, and decide include, maybe or exclude (keys I, M, E, U to undo). The probability is hidden by default. After each decision, the stopping panel shows the criterion's p value. "Maybe" counts as relevant, which is the conservative choice.
 6. **Stop.** The stop button becomes available once p < 0.05. Screen the manual queue in full.
-7. **Check a random sample (optional, recommended).** Draw a random sample of the ranked records you did not screen and screen it in full. Decisions on the sample do not change the stopping statistics; relevant records found there are reported in the methods paragraph, as a warning to continue screening. Available in the web version, the MCP server and the Python library (`Project.draw_audit`); the local app does not show it yet.
+7. **Check a random sample (optional, recommended).** Draw a random sample of the ranked records you did not screen and screen it in full. Decisions on the sample do not change the stopping statistics; relevant records found there are reported in the methods paragraph, as a warning to continue screening. Available in the web version, the local app (Sample check tab), the MCP server and the Python library (`Project.draw_audit`).
 8. **Report.** PRISMA 2020 counts, a draft methods paragraph, decisions (CSV), included and maybe records (RIS), and a project archive with every request, response, score and decision.
 
 ## What to keep in mind
