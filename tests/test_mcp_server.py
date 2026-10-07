@@ -13,7 +13,7 @@ from reviewfast.jev_client import JevClient
 from reviewfast.project import Project
 
 EXPECTED = {'check_stopping', 'create_project', 'import_records', 'project_status', 'estimate_scoring_cost', 'score_records',
-            'freeze_ranking', 'next_record', 'record_decision', 'undo_last_decision', 'stop_screening', 'export_results'}
+            'freeze_ranking', 'next_record', 'record_decision', 'undo_last_decision', 'stop_screening', 'export_results', 'draw_audit_sample'}
 
 
 def test_tools_listed():
@@ -57,6 +57,13 @@ def test_full_screen_through_tools(tmp_path, theobald):
     assert mcp_server.stop_screening(path)['met']
     while (m := mcp_server.next_record(path, queue='manual')['record']) is not None:
         mcp_server.record_decision(path, m['rid'], 'include' if label[m['title']] else 'exclude')
+    a = mcp_server.draw_audit_sample(path, 5)
+    assert a['drawn'] == min(5, a['pool'])
+    while (x := mcp_server.next_record(path, queue='audit')['record']) is not None:
+        mcp_server.record_decision(path, x['rid'], 'include' if label[x['title']] else 'exclude')
+    st = mcp_server.project_status(path)
+    assert st['stop']['stopped_at'] == st['stop']['screened']           # audit decisions leave the stopping statistics alone
     files = mcp_server.export_results(path, str(tmp_path / 'out'))['written']
+    assert 'random sample' in (tmp_path / 'out' / 'methods.txt').read_text()
     assert all((tmp_path / 'out' / n).exists() for n in ('decisions.csv', 'included.ris', 'methods.txt', 'archive.zip'))
     assert len(files) == 4

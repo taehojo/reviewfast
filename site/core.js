@@ -6,7 +6,7 @@
   else root.RF = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
   const GATEWAY_URL = 'https://ai-gateway.vercel.sh/typesafe/v1/systemone';
   const MODEL = 'typesafe-ai/jev';
   const BATCH_SIZE = 10;
@@ -290,6 +290,7 @@
   function nextRecord(p, queue = 'ranked') {
     const done = decided(p), m = byRid(p);
     if (queue === 'ranked') { if (!p.ranking) return null; for (let i = 0; i < p.ranking.length; i++) if (!done.has(p.ranking[i])) return { ...m[p.ranking[i]], rank: i + 1, p: p.scores[p.ranking[i]].p }; return null; }
+    if (queue === 'audit') { for (const rid of (p.audit ? p.audit.rids : [])) if (!done.has(rid)) return { ...m[rid], rank: p.ranking.indexOf(rid) + 1, p: p.scores[rid].p }; return null; }
     for (const r of unique(p)) if (r.flag && !done.has(r.rid)) return { ...r, rank: null, p: null };
     return null;
   }
@@ -306,8 +307,10 @@
   function decide(p, rid, decision) {
     if (!['include', 'exclude', 'maybe'].includes(decision)) throw new Error('Unknown decision.');
     if (!p.ranking) throw new Error('Freeze the ranking before screening.');
+    const inAudit = !!(p.audit && p.audit.rids.includes(rid)) && !decided(p).has(rid);
     const inRank = p.ranking.includes(rid); let queue;
-    if (inRank) {
+    if (inAudit) queue = 'audit';
+    else if (inRank) {
       const nxt = nextRecord(p, 'ranked');
       if (!nxt || nxt.rid !== rid) throw new Error('Ranked records must be screened in ranked order.');
       if (p.stopped_at != null) throw new Error('Screening of the ranked set has been stopped.');
@@ -326,6 +329,23 @@
     if (last.queue === 'ranked' && p.stopped_at != null) throw new Error('Screening of the ranked set has been stopped.');
     p.decisions.pop(); logEvent(p, 'undo', { rid: last.rid, decision: last.decision }); return last;
   }
+  /* Random-sample check after stopping: draws records from the ranked records left unscreened, for full screening. Their
+     decisions do not change the stopping statistics; relevant records found there are reported. */
+  function drawAudit(p, n, seed) {
+    if (p.stopped_at == null) throw new Error('Stop screening the ranked list first.');
+    if (p.audit && p.audit.rids.length) throw new Error('A random sample has already been drawn.');
+    const done = decided(p); const pool = p.ranking.filter((rid) => !done.has(rid));
+    const k = Math.max(0, Math.min(Math.floor(n), pool.length)); const s = seed != null ? seed : p.seed + 2;
+    p.audit = { rids: shuffle(pool, s).slice(0, k), seed: s, pool: pool.length, drawn_at: new Date().toISOString() };
+    logEvent(p, 'audit_drawn', { size: k, pool: pool.length, seed: s });
+    return auditSummary(p);
+  }
+  function auditSummary(p) {
+    if (!p.audit) return null;
+    const dec = {}; for (const d of p.decisions) if (d.queue === 'audit') dec[d.rid] = d.decision;
+    const screened = p.audit.rids.filter((r) => r in dec).length, relevant = p.audit.rids.filter((r) => dec[r] && dec[r] !== 'exclude').length;
+    return { drawn: p.audit.rids.length, pool: p.audit.pool, screened, relevant, remaining: p.audit.rids.length - screened };
+  }
   function stop(p) {
     const st = projectStop(p); if (!st.met) throw new Error('The stopping criterion has not been met.');
     p.stopped_at = st.screened; logEvent(p, 'stopped', st); return st;
@@ -333,7 +353,7 @@
   function counts(p) {
     const u = unique(p), flags = { no_abstract: 0, non_english: 0, no_score: 0, user: 0 };
     for (const r of u) if (r.flag) flags[r.flag] = (flags[r.flag] || 0) + 1;
-    const dec = {}; for (const q of ['ranked', 'manual']) for (const d of ['include', 'exclude', 'maybe']) dec[`${q}_${d}`] = p.decisions.filter((x) => x.queue === q && x.decision === d).length;
+    const dec = {}; for (const q of ['ranked', 'manual', 'audit']) for (const d of ['include', 'exclude', 'maybe']) dec[`${q}_${d}`] = p.decisions.filter((x) => x.queue === q && x.decision === d).length;
     const nr = (p.ranking || []).length, sr = dec.ranked_include + dec.ranked_exclude + dec.ranked_maybe;
     return { imported: p.records.length, duplicates: p.records.length - u.length, unique: u.length, manual_queue: Object.values(flags).reduce((a, b) => a + b, 0),
       manual_by_reason: flags, ranked: nr, ...dec, ranked_unscreened: nr - sr };
@@ -343,11 +363,12 @@
     const sr = c.ranked_include + c.ranked_exclude + c.ranked_maybe, sm = c.manual_include + c.manual_exclude + c.manual_maybe;
     return { records_identified: c.imported, duplicates_removed: c.duplicates, records_after_deduplication: c.unique,
       records_ranked: c.ranked, records_for_manual_screening: c.manual_queue, manual_screening_reasons: c.manual_by_reason,
-      records_screened: sr + sm, records_screened_ranked: sr, records_screened_manual: sm,
-      records_not_screened_after_stopping: st.stopped_at != null ? c.ranked_unscreened : 0,
+      records_screened: sr + sm + c.audit_include + c.audit_exclude + c.audit_maybe, records_screened_ranked: sr, records_screened_manual: sm,
+      records_not_screened_after_stopping: st.stopped_at != null ? c.ranked_unscreened - (c.audit_include + c.audit_exclude + c.audit_maybe) : 0,
       records_not_yet_screened: (st.stopped_at != null ? 0 : c.ranked_unscreened) + st.manual_remaining,
-      records_excluded: c.ranked_exclude + c.manual_exclude,
-      records_sought_for_retrieval: c.ranked_include + c.ranked_maybe + c.manual_include + c.manual_maybe, stopping: st };
+      records_excluded: c.ranked_exclude + c.manual_exclude + c.audit_exclude,
+      records_sought_for_retrieval: c.ranked_include + c.ranked_maybe + c.manual_include + c.manual_maybe + c.audit_include + c.audit_maybe,
+      audit: auditSummary(p), stopping: st };
   }
 
   // ---------- exports
@@ -361,22 +382,24 @@
       `We screened titles and abstracts with ReviewFast (web version ${VERSION}). Of ${n_(P.records_identified, 'record')} retrieved, ` +
       (P.duplicates_removed ? `we removed ${n_(P.duplicates_removed, 'duplicate')} (matched on DOI, PubMed identifier, or normalised title and year), leaving ${n_(P.records_after_deduplication, 'unique record')}.`
         : 'we found no duplicates (matched on DOI, PubMed identifier, or normalised title and year).'),
-      `We scored ${n_(P.records_ranked, 'record')} with a zero-shot LLM classifier, Jev (model alias ${MODEL}, accessed through the Vercel AI Gateway ${when}; the provider does not report a model version). ` +
+      `We scored ${n_(P.records_ranked, 'record')} with a decision model, Jev (model alias ${MODEL}, accessed through the Vercel AI Gateway ${when}; the provider does not report a model version). ` +
       `Each request contained the review title, research question and eligibility criteria from our protocol and up to ${BATCH_SIZE} records in random order, and asked for each record: "${QUESTION}"`,
-      'We screened the ranked records in descending order of the classifier probability, with the probabilities hidden from the screener. We counted records marked as possibly relevant as relevant for the stopping criterion.',
+      'We screened the ranked records in descending order of the Jev probability, with the probabilities hidden from the screener. We counted records marked as possibly relevant as relevant for the stopping criterion.',
     ];
     if (st.stopped_at != null) {
       parts.push(`We stopped screening the ranked records when the statistical stopping criterion of Callaghan and Müller-Hansen (ranked quasi-sampling variant) rejected the hypothesis that recall was below ${p.recall_target.toFixed(2)} at the ${(1 - p.confidence).toFixed(2)} level ` +
         `(p = ${Number(st.p_value.toPrecision(3))}), after screening ${st.stopped_at} of ${st.ranked_total} ranked records (${(100 * st.stopped_at / st.ranked_total).toFixed(1)}%). We did not screen the remaining ${n_(P.records_not_screened_after_stopping, 'record')}.`);
     } else if (P.records_not_yet_screened === 0) parts.push(`We screened all ${n_(P.records_ranked, 'ranked record')}.`);
     else parts.push(`At the time of this report, ${n_(P.records_not_yet_screened, 'record')} had not yet been screened and the stopping criterion had not been applied.`);
+    const A = P.audit;
+    if (A && A.screened) parts.push(`After stopping, we screened a random sample of ${n_(A.screened, 'record')} drawn from the ${A.pool} ranked records not screened; ${A.relevant ? `${n_(A.relevant, 'record')} in the sample ${A.relevant === 1 ? 'was' : 'were'} judged relevant or possibly relevant` : 'none was judged relevant'}.`);
     const R = P.manual_screening_reasons;
     if (P.records_for_manual_screening) {
       const why = [R.no_abstract ? `${R.no_abstract} without an abstract` : '', R.non_english ? `${R.non_english} flagged as not in English` : '',
-        R.no_score ? `${R.no_score} without a usable classifier score` : '', R.user ? `${R.user} set aside by the reviewers` : ''].filter(Boolean);
+        R.no_score ? `${R.no_score} without a usable model score` : '', R.user ? `${R.user} set aside by the reviewers` : ''].filter(Boolean);
       parts.push(`We screened ${n_(P.records_for_manual_screening, 'record')} in full outside the ranking (${why.join('; ')}).`);
     }
-    parts.push(`The classifier requests used ${s.tokens} input tokens and cost US$${s.cost_usd.toFixed(2)}. We have archived every request, response and score so that the ranking can be audited.`);
+    parts.push(`The Jev requests used ${s.tokens} input tokens and cost US$${s.cost_usd.toFixed(2)}. We have archived every request, response and score so that the ranking can be audited.`);
     return parts.join(' ') + '\n\nReference: Callaghan MW, Müller-Hansen F. Statistical stopping criteria for automated screening in systematic reviews. Syst Rev. 2020;9:273.\n';
   }
   function csvEsc(v) { const s = v == null ? '' : String(v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
@@ -410,6 +433,6 @@
 
   return { VERSION, GATEWAY_URL, MODEL, BATCH_SIZE, QUESTION, RECALL_TARGET, CONFIDENCE, parseRis, parseNbib, parsePubmedXml, parseCsv,
     parseFile, looksNonEnglish, importRecords, criteriaBlock, buildRequest, parseAnswers, estimateCost, rng, shuffle, h0Pvalue, stopStatus,
-    newProject, logEvent, toScore, scoringSummary, freezeRanking, nextRecord, rankedLabels, projectStop, decide, undo, stop, counts,
+    newProject, logEvent, drawAudit, auditSummary, toScore, scoringSummary, freezeRanking, nextRecord, rankedLabels, projectStop, decide, undo, stop, counts,
     prisma, methodsText, decisionsCsv, includedRis, toRis, normDoi };
 });

@@ -82,6 +82,11 @@ test('full demo screen on Theobald_2021 stops and reports', () => {
   assert.ok(st.met); RF.stop(p);
   assert.throws(() => RF.decide(p, RF.nextRecord(p).rid, 'exclude'));
   for (let r; (r = RF.nextRecord(p, 'manual')); ) RF.decide(p, r.rid, label[r.title] ? 'include' : 'exclude');
+  const pool = 55 - st.screened;
+  assert.throws(() => RF.drawAudit(RF.newProject('t', 'q', 'c', 1), 5));          // only after stopping
+  const A0 = RF.drawAudit(p, 10); assert.strictEqual(A0.drawn, pool); assert.throws(() => RF.drawAudit(p, 1));
+  for (let r; (r = RF.nextRecord(p, 'audit')); ) RF.decide(p, r.rid, label[r.title] ? 'include' : 'exclude');
+  const A = RF.auditSummary(p); assert.strictEqual(A.screened, pool); assert.strictEqual(RF.projectStop(p).screened, st.screened);
   const P = RF.prisma(p);
   assert.strictEqual(P.records_identified, 70); assert.strictEqual(P.records_not_yet_screened, 0);
   assert.strictEqual(P.records_screened + P.records_not_screened_after_stopping, 70);

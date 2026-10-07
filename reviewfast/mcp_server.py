@@ -1,7 +1,7 @@
 """MCP server for ReviewFast: lets an MCP client (Claude Desktop, Claude Code, other assistants) run the screening workflow on
 local project files. Start it with `reviewfast-mcp` (stdio transport).
 
-The workflow is the one the accompanying paper evaluated: score the records with a zero-shot LLM classifier (Jev, ten records
+The workflow is the one the accompanying paper evaluated: score the records with a decision model (Jev, ten records
 per request, the paper's prompt), freeze the ranking, let a person screen in ranked order, and stop when the statistical
 criterion of Callaghan and Mueller-Hansen indicates at least 95% recall with 95% confidence. Screening decisions must come from
 the human reviewer; the stopping criterion is only valid for human decisions made in ranked order.
@@ -27,11 +27,12 @@ DATA_NOTICE = ('The criteria and the titles and abstracts are sent to TypeSafe A
 INSTRUCTIONS = f"""ReviewFast {__version__}: title and abstract screening for systematic reviews.
 Workflow: create_project -> import_records -> estimate_scoring_cost -> score_records -> freeze_ranking ->
 repeat (next_record -> the human reviewer decides -> record_decision) -> stop_screening when stopping_met is true ->
-screen the manual queue (next_record with queue='manual') -> export_results.
+screen the manual queue (next_record with queue='manual') -> optionally draw_audit_sample and screen it
+(next_record with queue='audit') -> export_results.
 Rules:
 - record_decision must carry the human reviewer's own decision. Do not decide inclusion on the reviewer's behalf; the stopping
   criterion assumes human decisions made in ranked order.
-- Do not show the classifier probability to the reviewer unless they ask (it can anchor decisions).
+- Do not show the Jev probability to the reviewer unless they ask (it can anchor decisions).
 - Before score_records, show the reviewer this data notice and get their agreement: {DATA_NOTICE}
 - Do not use a probability threshold as a stopping rule; the paper did not support it.
 Scoring needs a Vercel AI Gateway API key with paid credits in the environment variable AI_GATEWAY_API_KEY."""
@@ -147,9 +148,10 @@ def freeze_ranking(project: str) -> dict:
 
 @server.tool()
 def next_record(project: str, queue: str = 'ranked', show_probability: bool = False) -> dict:
-    """The next record to screen. queue='ranked' (in ranked order) or 'manual'. The probability is hidden unless requested."""
-    if queue not in ('ranked', 'manual'):
-        raise ValueError("queue must be 'ranked' or 'manual'.")
+    """The next record to screen. queue='ranked' (in ranked order), 'manual', or 'audit' (the random-sample check after
+    stopping). The probability is hidden unless requested."""
+    if queue not in ('ranked', 'manual', 'audit'):
+        raise ValueError("queue must be 'ranked', 'manual' or 'audit'.")
     p = _open(project)
     try:
         r = p.next_record(queue)
@@ -187,6 +189,18 @@ def stop_screening(project: str) -> dict:
     p = _open(project)
     try:
         return p.stop()
+    finally:
+        p.close()
+
+
+@server.tool()
+def draw_audit_sample(project: str, size: int) -> dict:
+    """After stopping, draws a random sample of the ranked records left unscreened for the reviewer to screen in full (the
+    paper's suggested safeguard). Screen it with next_record(queue='audit') and record_decision. Relevant records found there
+    are reported; they do not change the stopping statistics."""
+    p = _open(project)
+    try:
+        return p.draw_audit(size)
     finally:
         p.close()
 

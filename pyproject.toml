@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reviewfast"
-version = "0.2.0"
-description = "Title and abstract screening for systematic reviews: zero-shot LLM classifier ranking with a statistical stopping criterion"
+version = "0.3.0"
+description = "Title and abstract screening for systematic reviews: decision-model ranking with a statistical stopping criterion"
 readme = "README.md"
 license = "Apache-2.0"
 authors = [{ name = "Taeho Jo", email = "tjo@iu.edu" }]

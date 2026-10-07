@@ -1,12 +1,12 @@
 # ReviewFast
 
-ReviewFast is a free tool for title and abstract screening in systematic reviews. A zero-shot LLM classifier (Jev, TypeSafe AI, through the Vercel AI Gateway) ranks the retrieved records against your eligibility criteria. You screen them in that order and stop when a statistical stopping criterion (Callaghan and Müller-Hansen, 2020) indicates that you have found at least 95% of the relevant records with 95% confidence.
+ReviewFast is a free tool for title and abstract screening in systematic reviews. A decision model (Jev, TypeSafe AI, through the Vercel AI Gateway), a model that answers a yes-or-no question about each record with a probability instead of generating text, ranks the retrieved records against your eligibility criteria. You screen them in that order and stop when a statistical stopping criterion (Callaghan and Müller-Hansen, 2020) indicates that you have found at least 95% of the relevant records with 95% confidence.
 
 - **Web version:** https://www.jolab.ai/reviewfast/ runs entirely in your browser. It includes a demo on a public review that needs no key.
 - **Python package:** a local web app and a command line (`reviewfast`).
 - **MCP server:** `reviewfast-mcp` lets an AI assistant run the steps while you make the screening decisions.
 
-The workflow is the one the accompanying evaluation of zero-shot LLM classifiers for screening examined (manuscript in preparation; citation to be added). In that study, ranking with Jev followed by the statistical stopping criterion, a post hoc analysis, reached 95% recall in all 51 reviews evaluated (23 held-out SYNERGY reviews and 28 CLEF 2019 Cochrane reviews). Reviewers read 87.6% and 86.1% of the records on average. Most of the saving comes in large reviews; in small reviews the criterion needs almost every record before it can stop. The full workflow was evaluated with one classifier, Jev.
+The workflow is the one the accompanying evaluation of a decision model for screening examined (manuscript in preparation; citation to be added). In that study, ranking with Jev followed by the statistical stopping criterion, a post hoc analysis, reached 95% recall in all 51 reviews evaluated (23 held-out SYNERGY reviews and 28 CLEF 2019 Cochrane reviews). Reviewers read 87.6% and 86.1% of the records on average. Most of the saving comes in large reviews; in small reviews the criterion needs almost every record before it can stop. The full workflow was evaluated with one decision model, Jev.
 
 ## Install and run (Python)
 
@@ -40,17 +40,18 @@ Add the server to your MCP client, for example Claude Desktop or Claude Code:
 }
 ```
 
-Tools: `create_project`, `import_records`, `estimate_scoring_cost`, `score_records`, `freeze_ranking`, `next_record`, `record_decision`, `undo_last_decision`, `stop_screening`, `export_results`, `project_status`, and `check_stopping`, which applies the criterion to any ranked screen without a project. The server instructions tell the assistant that inclusion decisions must come from the human reviewer, that the probability stays hidden unless asked, and that the data notice must be accepted before scoring.
+Tools: `create_project`, `import_records`, `estimate_scoring_cost`, `score_records`, `freeze_ranking`, `next_record`, `record_decision`, `undo_last_decision`, `stop_screening`, `draw_audit_sample`, `export_results`, `project_status`, and `check_stopping`, which applies the criterion to any ranked screen without a project. The server instructions tell the assistant that inclusion decisions must come from the human reviewer, that the probability stays hidden unless asked, and that the data notice must be accepted before scoring.
 
 ## Workflow
 
 1. **New project.** Enter the review title, research question and eligibility criteria from your protocol, written before screening.
-2. **Import.** Upload RIS, CSV, PubMed format (.nbib) or PubMed XML files (the Python version also accepts pasted PMIDs). ReviewFast removes duplicates by DOI, PMID, or title and year. Records without an abstract, or whose title and abstract do not appear to be in English, go to a manual queue and are not sent to the classifier.
+2. **Import.** Upload RIS, CSV, PubMed format (.nbib) or PubMed XML files (the Python version also accepts pasted PMIDs). ReviewFast removes duplicates by DOI, PMID, or title and year. Records without an abstract, or whose title and abstract do not appear to be in English, go to a manual queue and are not sent to Jev.
 3. **Score.** ReviewFast sends the records in seeded random order, ten per request, with the prompt of the evaluation. The request bodies are byte-identical to those used in the evaluation. Requests are paced and retried with the server's `retry-after`. Scoring can be cancelled and resumed.
-4. **Freeze the ranking.** The order is fixed: highest probability first, with ties broken by the project seed. Records that the classifier did not score, including refusals, move to the manual queue.
+4. **Freeze the ranking.** The order is fixed: highest probability first, with ties broken by the project seed. Records that the model did not score, including refusals, move to the manual queue.
 5. **Screen.** You see one record at a time, in ranked order, and decide include, maybe or exclude (keys I, M, E, U to undo). The probability is hidden by default. After each decision, the stopping panel shows the criterion's p value. "Maybe" counts as relevant, which is the conservative choice.
 6. **Stop.** The stop button becomes available once p < 0.05. Screen the manual queue in full.
-7. **Report.** PRISMA 2020 counts, a draft methods paragraph, decisions (CSV), included and maybe records (RIS), and a project archive with every request, response, score and decision.
+7. **Check a random sample (optional, recommended).** Draw a random sample of the ranked records you did not screen and screen it in full. Decisions on the sample do not change the stopping statistics; relevant records found there are reported in the methods paragraph, as a warning to continue screening. Available in the web version, the MCP server and the Python library (`Project.draw_audit`); the local app does not show it yet.
+8. **Report.** PRISMA 2020 counts, a draft methods paragraph, decisions (CSV), included and maybe records (RIS), and a project archive with every request, response, score and decision.
 
 ## What to keep in mind
 
@@ -65,7 +66,7 @@ Tools: `create_project`, `import_records`, `estimate_scoring_cost`, `score_recor
 
 | Path | Contents |
 |---|---|
-| `reviewfast/` | Python package: classifier client, project file, stopping criterion, reports, local web app, CLI, MCP server |
+| `reviewfast/` | Python package: decision-model client, project file, stopping criterion, reports, local web app, CLI, MCP server |
 | `site/` | Web version served at jolab.ai/reviewfast (plain HTML, CSS and JavaScript, no build step); `site/demo/` holds the demo review |
 | `tests/` | Python tests (no network) |
 | `site/test/` | JavaScript core tests (`node site/test/core.test.js`) and a browser test (Playwright, developer check) |

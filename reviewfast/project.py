@@ -201,6 +201,12 @@ class Project:
 
     # ---------- screening
     def next_record(self, queue='ranked'):
+        if queue == 'audit':
+            for rid in self.meta('audit_rids') or []:
+                if not self.db.execute('SELECT 1 FROM decisions WHERE rid=?', (rid,)).fetchone():
+                    r = self.db.execute('SELECT r.*, k.rank, s.p FROM records r JOIN ranking k ON k.rid=r.rid JOIN scores s ON s.rid=r.rid WHERE r.rid=?', (rid,)).fetchone()
+                    return dict(r)
+            return None
         if queue == 'ranked':
             r = self.db.execute('SELECT r.*, k.rank, s.p FROM ranking k JOIN records r ON r.rid=k.rid JOIN scores s ON s.rid=k.rid '
                                 'LEFT JOIN decisions d ON d.rid=k.rid WHERE d.rid IS NULL ORDER BY k.rank LIMIT 1').fetchone()
@@ -216,7 +222,10 @@ class Project:
             raise ProjectError('Freeze the ranking before screening.')
         with self.lock:
             in_rank = self.db.execute('SELECT rank FROM ranking WHERE rid=?', (rid,)).fetchone()
-            if in_rank:
+            in_audit = rid in (self.meta('audit_rids') or []) and not self.db.execute('SELECT 1 FROM decisions WHERE rid=?', (rid,)).fetchone()
+            if in_audit:
+                queue = 'audit'
+            elif in_rank:
                 nxt = self.next_record('ranked')
                 if not nxt or nxt['rid'] != rid:
                     raise ProjectError('Ranked records must be screened in ranked order (the stopping criterion depends on it).')
@@ -248,7 +257,7 @@ class Project:
     def ranked_labels(self):
         """Relevance (include or maybe = 1) of the screened ranked records, in rank order. 'Maybe' counts as relevant, which is the
         conservative choice for the stopping criterion."""
-        rows = self.db.execute("SELECT d.decision FROM ranking k JOIN decisions d ON d.rid=k.rid ORDER BY k.rank").fetchall()
+        rows = self.db.execute("SELECT d.decision FROM ranking k JOIN decisions d ON d.rid=k.rid WHERE d.queue='ranked' ORDER BY k.rank").fetchall()
         return [0 if r[0] == 'exclude' else 1 for r in rows]
 
     def stop_status(self):
@@ -257,6 +266,30 @@ class Project:
         d['manual_remaining'] = self.db.execute('SELECT COUNT(*) FROM records r LEFT JOIN decisions d ON d.rid=r.rid '
                                                 'WHERE r.dup_of IS NULL AND r.flag IS NOT NULL AND d.rid IS NULL').fetchone()[0]
         return d
+
+    # ---------- random-sample check after stopping
+    def draw_audit(self, n, seed=None):
+        """Draws a random sample of the ranked records left unscreened after stopping, for full screening (the paper's suggested
+        safeguard). Decisions on the sample do not change the stopping statistics; relevant records found there are reported."""
+        if self.meta('stopped_at') is None:
+            raise ProjectError('Stop screening the ranked list first.')
+        if self.meta('audit_rids'):
+            raise ProjectError('A random sample has already been drawn.')
+        with self.lock:
+            pool = [r[0] for r in self.db.execute('SELECT k.rid FROM ranking k LEFT JOIN decisions d ON d.rid=k.rid WHERE d.rid IS NULL ORDER BY k.rank')]
+            seed = seed if seed is not None else self.meta('seed') + 2
+            pick = random.Random(seed).sample(pool, max(0, min(int(n), len(pool))))
+            self.set_meta('audit_rids', pick); self.set_meta('audit_pool', len(pool)); self.set_meta('audit_seed', seed)
+            self.log('audit_drawn', {'size': len(pick), 'pool': len(pool), 'seed': seed})
+        return self.audit_summary()
+
+    def audit_summary(self):
+        rids = self.meta('audit_rids')
+        if not rids:
+            return None
+        dec = {r[0]: r[1] for r in self.db.execute("SELECT rid, decision FROM decisions WHERE queue='audit'")}
+        screened = sum(1 for r in rids if r in dec); relevant = sum(1 for r in rids if dec.get(r) in ('include', 'maybe'))
+        return {'drawn': len(rids), 'pool': self.meta('audit_pool'), 'screened': screened, 'relevant': relevant, 'remaining': len(rids) - screened}
 
     def stop(self):
         with self.lock:
@@ -271,7 +304,7 @@ class Project:
     def counts(self):
         q = lambda s, a=(): self.db.execute(s, a).fetchone()[0]
         flags = {f: q('SELECT COUNT(*) FROM records WHERE dup_of IS NULL AND flag=?', (f,)) for f in MANUAL_FLAGS}
-        dec = {f'{queue}_{d}': q('SELECT COUNT(*) FROM decisions WHERE queue=? AND decision=?', (queue, d)) for queue in ('ranked', 'manual') for d in DECISIONS}
+        dec = {f'{queue}_{d}': q('SELECT COUNT(*) FROM decisions WHERE queue=? AND decision=?', (queue, d)) for queue in ('ranked', 'manual', 'audit') for d in DECISIONS}
         return {
             'imported': q('SELECT COUNT(*) FROM records'),
             'duplicates': q('SELECT COUNT(*) FROM records WHERE dup_of IS NOT NULL'),

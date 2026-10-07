@@ -147,16 +147,16 @@
   }
 
   // ---------------- project views
-  const STEPS = [['setup', 'Criteria'], ['import', 'Import'], ['score', 'Score'], ['screen', 'Screen'], ['manual', 'Manual queue'], ['report', 'Report']];
+  const STEPS = [['setup', 'Criteria'], ['import', 'Import'], ['score', 'Score'], ['screen', 'Screen'], ['manual', 'Manual queue'], ['audit', 'Sample check'], ['report', 'Report']];
   function stepper(p, cur) {
-    const done = { setup: true, import: p.records.length > 0, score: !!p.ranking, screen: p.stopped_at != null, manual: p.ranking && !RF.nextRecord(p, 'manual'), report: false };
+    const done = { setup: true, import: p.records.length > 0, score: !!p.ranking, screen: p.stopped_at != null, manual: p.ranking && !RF.nextRecord(p, 'manual'), audit: !!(p.audit && !RF.nextRecord(p, 'audit')), report: false };
     return `<nav class="stepper" aria-label="Steps">${STEPS.map(([k, l]) => `<a href="#/p/${esc(p.id)}/${k}" class="${k === cur ? 'on' : done[k] ? 'done' : ''}">${l}</a>`).join('')}</nav>`;
   }
   function head(p, cur) {
     return `<div class="small muted"><a href="#/projects">Projects</a> / ${esc(p.title)}</div>${stepper(p, cur)}`;
   }
   function renderProject(p, step) {
-    ({ setup: viewSetup, import: viewImport, score: viewScore, screen: viewScreen, manual: viewManual, report: viewReport }[step] || viewImport)(p);
+    ({ setup: viewSetup, import: viewImport, score: viewScore, screen: viewScreen, manual: viewManual, audit: viewAudit, report: viewReport }[step] || viewImport)(p);
   }
 
   function viewSetup(p) {
@@ -166,7 +166,7 @@
       <label for="s-t">Review title</label><input id="s-t" type="text" value="${esc(p.title)}" ${locked ? 'disabled' : ''}>
       <label for="s-q">Research question</label><input id="s-q" type="text" value="${esc(p.question)}" ${locked ? 'disabled' : ''}>
       <label for="s-c">Eligibility criteria</label><textarea id="s-c" ${locked ? 'disabled' : ''}>${esc(p.criteria)}</textarea>
-      <p class="small muted">What the classifier receives before each batch of records:</p><pre>${esc(RF.criteriaBlock(p.title, p.question, p.criteria))}</pre>
+      <p class="small muted">What Jev receives before each batch of records:</p><pre>${esc(RF.criteriaBlock(p.title, p.question, p.criteria))}</pre>
       ${locked ? '' : '<button class="btn primary" id="s-save">Save</button>'}</div>`;
     if (!locked) $('#s-save').addEventListener('click', () => {
       p.title = $('#s-t').value; p.question = $('#s-q').value; p.criteria = $('#s-c').value; RF.logEvent(p, 'criteria_updated'); save(p, true); viewSetup(p);
@@ -186,7 +186,7 @@
           <div class="kv"><span>Imported</span><b>${c.imported}</b><span>Duplicates removed</span><b>${c.duplicates}</b><span>Unique records</span><b>${c.unique}</b>
           <span>Manual queue: no abstract</span><b>${c.manual_by_reason.no_abstract}</b><span>Manual queue: not in English</span><b>${c.manual_by_reason.non_english}</b>
           <span>To be ranked</span><b>${c.unique - c.manual_queue}</b></div>
-          <p class="small muted">Records in the manual queue are not sent to the classifier; screen them in full after the ranked list.</p>
+          <p class="small muted">Records in the manual queue are not sent to Jev; screen them in full after the ranked list.</p>
           <a class="btn primary ${c.unique - c.manual_queue ? '' : 'hidden'}" href="#/p/${esc(p.id)}/score">Next: score the records</a>
         </div>
       </div>`;
@@ -244,7 +244,7 @@
         const ts = new Date().toISOString();
         p.batches.push({ ts, endpoint: RF.GATEWAY_URL, purpose: 'score', rids: unit.map((r) => r.rid), request: body, response: res.response || null,
           status: res.status, error: res.error || null, tokens: res.tokens, cost: res.cost || 0, attempts: res.attempts });
-        unit.forEach((r, k) => { p.scores[r.rid] = { p: probs[k], error: probs[k] == null ? (res.error || 'no answer from the classifier (possible refusal)') : null, ts }; });
+        unit.forEach((r, k) => { p.scores[r.rid] = { p: probs[k], error: probs[k] == null ? (res.error || 'no answer from Jev (possible refusal)') : null, ts }; });
         done += unit.length; save(p); ui(done, todo.length, RF.scoringSummary(p).cost_usd, waits);
       }
     }
@@ -345,7 +345,7 @@
   function recordCard(r, total, opts) {
     const meta = [r.year, r.journal, r.authors && r.authors.split(';').slice(0, 3).join(';') + (r.authors.split(';').length > 3 ? ' et al.' : '')].filter(Boolean).map(esc).join(' · ');
     return `<article class="card record">
-      <div class="small muted">${opts.queue === 'manual' ? `Manual queue (${esc({ no_abstract: 'no abstract', non_english: 'not in English', no_score: 'no classifier score', user: 'set aside' }[r.flag] || r.flag)})` : `Rank ${r.rank} of ${total}`}${opts.showP && r.p != null ? ` · probability ${r.p.toFixed(2)}` : ''}</div>
+      <div class="small muted">${opts.queue === 'audit' ? `Random-sample check (rank ${r.rank} of ${total}, not screened before stopping)` : opts.queue === 'manual' ? `Manual queue (${esc({ no_abstract: 'no abstract', non_english: 'not in English', no_score: 'no Jev score', user: 'set aside' }[r.flag] || r.flag)})` : `Rank ${r.rank} of ${total}`}${opts.showP && r.p != null ? ` · probability ${r.p.toFixed(2)}` : ''}</div>
       <h3>${esc(r.title || '(no title)')}</h3>
       ${meta ? `<div class="small muted">${meta}${r.doi ? ` · <a href="https://doi.org/${esc(r.doi)}" rel="noopener" target="_blank">doi</a>` : ''}</div>` : ''}
       <div class="abstract">${esc(r.abstract || '(no abstract)')}</div>
@@ -386,11 +386,11 @@
       left = `<div class="card"><h3>${stopped ? 'Ranked list closed' : 'All ranked records screened'}</h3>
         <p class="muted">${stopped ? `You stopped after ${st.stopped_at} of ${p.ranking.length} ranked records; ${p.ranking.length - st.stopped_at} were not screened and are reported as excluded by the stopping rule.` : 'Every ranked record has a decision.'}
         ${st.manual_remaining ? ` ${st.manual_remaining} records in the manual queue still need screening.` : ''}</p>
-        ${p.demo ? demoResult(p) : `<div class="btns">${st.manual_remaining ? `<a class="btn primary" href="#/p/${esc(p.id)}/manual">Screen the manual queue</a>` : ''}<a class="btn" href="#/p/${esc(p.id)}/report">Report</a></div>`}
+        ${p.demo ? demoResult(p) : `<div class="btns">${st.manual_remaining ? `<a class="btn primary" href="#/p/${esc(p.id)}/manual">Screen the manual queue</a>` : ''}${stopped ? `<a class="btn" href="#/p/${esc(p.id)}/audit">Check a random sample of unscreened records</a>` : ''}<a class="btn" href="#/p/${esc(p.id)}/report">Report</a></div>`}
         <div class="btns"><button class="btn ghost" data-d="undo">Undo last decision<span class="kbd">U</span></button></div></div>`;
     } else {
       left = recordCard(r, p.ranking.length, { showP, extra: (p.demo ? demoControls(p, r) : '') +
-        `<label class="check small"><input type="checkbox" id="showp" ${showP ? 'checked' : ''}> <span>Show the classifier probability (it can anchor your judgement)</span></label>` });
+        `<label class="check small"><input type="checkbox" id="showp" ${showP ? 'checked' : ''}> <span>Show the Jev probability (it can anchor your judgement)</span></label>` });
     }
     view.innerHTML = `${top}<div class="screen"><div>${left}</div><div>${stopPanel(p)}</div></div>`;
     finishBars();
@@ -408,11 +408,35 @@
     if (r) bindDecisions(p, 'manual', () => viewManual(p));
   }
 
+  function viewAudit(p) {
+    const st = p.ranking ? RF.projectStop(p) : null;
+    if (!p.ranking || st.stopped_at == null) { view.innerHTML = `${head(p, 'audit')}<div class="notice">The sample check is available after you stop screening the ranked list.</div>`; return; }
+    const A = RF.auditSummary(p);
+    if (!A) {
+      const pool = p.ranking.length - st.stopped_at, def = Math.min(pool, Math.max(20, Math.ceil(pool * 0.05)));
+      view.innerHTML = `${head(p, 'audit')}<div class="card"><h3>Check a random sample of the records you did not screen</h3>
+        <p class="muted">The paper suggests double-screening a random sample of the records left unscreened as a safeguard. ReviewFast draws the sample with the project seed; your decisions on it do not change the stopping statistics, and any relevant record you find is reported.</p>
+        <label for="asz">Sample size (of ${pool} unscreened ranked records)</label><input id="asz" type="text" inputmode="numeric" value="${def}">
+        <div class="btns"><button class="btn primary" id="adraw">Draw the sample</button><a class="btn ghost" href="#/p/${esc(p.id)}/report">Skip</a></div></div>`;
+      $('#adraw').addEventListener('click', () => {
+        const n = parseInt($('#asz').value, 10); if (!(n > 0)) return toast('Enter a sample size of at least 1.', 'warn');
+        try { RF.drawAudit(p, n); save(p, true); viewAudit(p); } catch (e) { toast(e.message, 'bad'); }
+      });
+      return;
+    }
+    const r = RF.nextRecord(p, 'audit');
+    const summary = `<div class="card"><h3>Sample check</h3><div class="kv"><span>Drawn</span><b>${A.drawn} of ${A.pool}</b><span>Screened</span><b>${A.screened}</b><span>Judged relevant or maybe</span><b>${A.relevant}</b></div>
+      ${A.relevant ? '<div class="notice warn">Relevant records turned up among those you did not screen. Consider screening more of the ranked list, and report this in the review.</div>' : A.remaining ? '' : '<div class="notice good">No relevant record in the sample.</div>'}</div>`;
+    view.innerHTML = `${head(p, 'audit')}<div class="screen"><div>${r ? recordCard(r, p.ranking.length, { queue: 'audit' }) : `<div class="card"><h3>Sample check done</h3><a class="btn primary" href="#/p/${esc(p.id)}/report">Report</a></div>`}</div><div>${summary}</div></div>`;
+    if (r) bindDecisions(p, 'audit', () => viewAudit(p));
+  }
+
   function viewReport(p) {
     const P = RF.prisma(p), m = RF.methodsText(p);
     const rows = [['Records identified', P.records_identified], ['Duplicates removed', P.duplicates_removed], ['Records after deduplication', P.records_after_deduplication],
-      ['Ranked by the classifier', P.records_ranked], ['Screened in full outside the ranking', P.records_for_manual_screening], ['Records screened', P.records_screened],
+      ['Ranked by Jev', P.records_ranked], ['Screened in full outside the ranking', P.records_for_manual_screening], ['Records screened', P.records_screened],
       ['Not screened after stopping (excluded by the stopping rule)', P.records_not_screened_after_stopping], ['Not yet screened', P.records_not_yet_screened],
+      ...(P.audit ? [['Random-sample check after stopping: screened / judged relevant', `${P.audit.screened} / ${P.audit.relevant}`]] : []),
       ['Excluded at title and abstract', P.records_excluded], ['Included or maybe (sought for retrieval)', P.records_sought_for_retrieval]];
     view.innerHTML = `${head(p, 'report')}
       <div class="grid g2">
@@ -503,7 +527,7 @@ reviewfast serve        # opens http://127.0.0.1:8765</pre>
     }
   }
 }</pre>
-          <p class="muted small">Tools: create_project, import_records, estimate_scoring_cost, score_records, freeze_ranking, next_record, record_decision, undo_last_decision, stop_screening, export_results, project_status and check_stopping (the criterion alone, for any ranked screen). The server tells the assistant that inclusion decisions must come from you.</p></div>
+          <p class="muted small">Tools: create_project, import_records, estimate_scoring_cost, score_records, freeze_ranking, next_record, record_decision, undo_last_decision, stop_screening, draw_audit_sample, export_results, project_status and check_stopping (the criterion alone, for any ranked screen). The server tells the assistant that inclusion decisions must come from you.</p></div>
       </div>
       <div class="card"><h3>Source and validation</h3><p class="muted">Source code, tests and the reproduction of the evaluation's stopping results are on <a href="https://github.com/taehojo/reviewfast" rel="noopener">GitHub</a> (Apache-2.0). The browser version's stopping criterion matches the Python package and buscarpy 0.0.2 to within 1e-13.</p></div>`;
   }

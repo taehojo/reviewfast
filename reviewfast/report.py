@@ -22,6 +22,7 @@ def prisma(project):
     st = project.stop_status()
     screened_ranked = sum(c[f'ranked_{d}'] for d in ('include', 'exclude', 'maybe'))
     screened_manual = sum(c[f'manual_{d}'] for d in ('include', 'exclude', 'maybe'))
+    screened_audit = sum(c[f'audit_{d}'] for d in ('include', 'exclude', 'maybe'))
     return {
         'records_identified': c['imported'],
         'duplicates_removed': c['duplicates'],
@@ -29,13 +30,14 @@ def prisma(project):
         'records_ranked_by_jev': c['ranked'],
         'records_for_manual_screening': c['manual_queue'],
         'manual_screening_reasons': c['manual_by_reason'],
-        'records_screened': screened_ranked + screened_manual,
+        'records_screened': screened_ranked + screened_manual + screened_audit,
         'records_screened_ranked': screened_ranked,
         'records_screened_manual': screened_manual,
-        'records_not_screened_after_stopping': c['ranked_unscreened'] if st['stopped_at'] is not None else 0,
+        'records_not_screened_after_stopping': c['ranked_unscreened'] - screened_audit if st['stopped_at'] is not None else 0,
         'records_not_yet_screened': (0 if st['stopped_at'] is not None else c['ranked_unscreened']) + st['manual_remaining'],
-        'records_excluded': c['ranked_exclude'] + c['manual_exclude'],
-        'records_sought_for_retrieval': c['ranked_include'] + c['ranked_maybe'] + c['manual_include'] + c['manual_maybe'],
+        'records_excluded': c['ranked_exclude'] + c['manual_exclude'] + c['audit_exclude'],
+        'records_sought_for_retrieval': c['ranked_include'] + c['ranked_maybe'] + c['manual_include'] + c['manual_maybe'] + c['audit_include'] + c['audit_maybe'],
+        'audit': project.audit_summary(),
         'stopping': st,
     }
 
@@ -72,6 +74,10 @@ def methods_text(project):
     else:
         parts.append(f"At the time of this report, {_n(P['records_not_yet_screened'], 'record')} had not yet been screened and the "
                      f"stopping criterion had not been applied.")
+    A = P['audit']
+    if A and A['screened']:
+        parts.append(f"After stopping, we screened a random sample of {_n(A['screened'], 'record')} drawn from the {A['pool']} ranked records not screened; "
+                     + (f"{_n(A['relevant'], 'record')} in the sample {'was' if A['relevant'] == 1 else 'were'} judged relevant or possibly relevant." if A['relevant'] else 'none was judged relevant.'))
     reasons = P['manual_screening_reasons']
     if P['records_for_manual_screening']:
         why = [f"{reasons['no_abstract']} without an abstract" if reasons.get('no_abstract') else '',
