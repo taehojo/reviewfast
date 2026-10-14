@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it using the metadata below."
+message: "If you use this software, please cite the paper below (preferred-citation). The software itself is archived at Zenodo."
 type: software
 title: "ReviewFast"
 abstract: "Title and abstract screening for systematic reviews: decision-model ranking with a statistical stopping criterion. Web version, Python package and MCP server."
@@ -9,6 +9,7 @@ authors:
     email: tjo@iu.edu
     affiliation: "Department of Radiology and Imaging Sciences, Indiana University School of Medicine, Indianapolis, IN, USA"
 version: 0.3.1
+doi: "10.5281/zenodo.23243074"
 date-released: 2026-10-08
 license: Apache-2.0
 repository-code: "https://github.com/taehojo/reviewfast"
@@ -18,3 +19,17 @@ keywords:
   - title and abstract screening
   - stopping criterion
   - evidence synthesis
+preferred-citation:
+  type: article
+  title: "Label-free, low-cost AI ranking for systematic review screening"
+  authors:
+    - family-names: Jo
+      given-names: Taeho
+    - family-names: Lee
+      given-names: Donghyun
+    - family-names: Lee
+      given-names: Leonard
+  journal: medRxiv
+  year: 2026
+  doi: "10.64898/2026.10.09.26365173"
+  url: "https://doi.org/10.64898/2026.10.09.26365173"

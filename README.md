@@ -6,7 +6,7 @@ ReviewFast is a free tool for title and abstract screening in systematic reviews
 - **Python package:** a local web app and a command line (`reviewfast`).
 - **MCP server:** `reviewfast-mcp` lets an AI assistant run the steps while you make the screening decisions.
 
-The workflow is the one the accompanying evaluation of a decision model for screening examined (manuscript in preparation; citation to be added). In that study, ranking with Jev followed by the statistical stopping criterion, a post hoc analysis, reached 95% recall in all 51 reviews evaluated (23 held-out SYNERGY reviews and 28 CLEF 2019 Cochrane reviews). Reviewers read 87.6% and 86.1% of the records on average. Most of the saving comes in large reviews; in small reviews the criterion needs almost every record before it can stop. The full workflow was evaluated with one decision model, Jev.
+The workflow is the one the accompanying evaluation of a decision model for screening examined ([Jo, Lee and Lee, medRxiv 2026](https://doi.org/10.64898/2026.10.09.26365173)). In that study, ranking with Jev followed by the statistical stopping criterion, a post hoc analysis, reached 95% recall in all 51 reviews evaluated (23 held-out SYNERGY reviews and 28 CLEF 2019 Cochrane reviews). Reviewers read 87.6% and 86.1% of the records on average. Most of the saving comes in large reviews; in small reviews the criterion needs almost every record before it can stop. The full workflow was evaluated with one decision model, Jev.
 
 ## Install and run (Python)
 
@@ -80,6 +80,24 @@ Tools: `create_project`, `import_records`, `estimate_scoring_cost`, `score_recor
 - `site/test/core.test.js` checks that the web version builds the same request bodies as the Python package and that its stopping p values match the Python package and buscarpy 0.0.2 (largest difference about 1e-13).
 - The demo uses review Attai_2022 (SYNERGY held-out split, CC0) with the Jev probabilities stored by the evaluation.
 - A live comparison of new Jev scores with the stored scores (`validation/live_theobald.py`) has not been run yet. The gateway account used for development returned HTTP 403 for Jev on the free tier.
+
+## How to cite
+
+If you use ReviewFast, please cite the paper:
+
+> Jo T, Lee D, Lee L. Label-free, low-cost AI ranking for systematic review screening. medRxiv 2026. https://doi.org/10.64898/2026.10.09.26365173
+
+```bibtex
+@article{jo2026labelfree,
+  author  = {Jo, Taeho and Lee, Donghyun and Lee, Leonard},
+  title   = {Label-free, low-cost {AI} ranking for systematic review screening},
+  journal = {medRxiv},
+  year    = {2026},
+  doi     = {10.64898/2026.10.09.26365173}
+}
+```
+
+The software is archived at Zenodo: https://doi.org/10.5281/zenodo.23243074 (version 0.3.1). The analysis code and data of the paper are at https://doi.org/10.5281/zenodo.23270999.
 
 ## License
 
